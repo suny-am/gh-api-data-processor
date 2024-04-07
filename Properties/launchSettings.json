@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "gh_data_collector": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7029",
+      "launchBrowser": false
+    }
+  }
+}
