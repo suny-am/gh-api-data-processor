@@ -1,0 +1,25 @@
+{
+	"name": "Github API Data Processor",
+	"dockerComposeFile": "docker-compose.yaml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
+	"containerEnv": {
+		"HOME": "/home/vscode"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/azure-cli": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/azure-cli:1": {},
+		"ghcr.io/stuartleeks/dev-container-features/azure-cli-persistence:0": {},
+		"ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-dotnettools.csdevkit",
+				"ms-azuretools.vscode-azurefunctions"
+			]
+		}
+	}
+}
