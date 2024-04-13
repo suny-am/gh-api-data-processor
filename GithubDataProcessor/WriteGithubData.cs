@@ -6,20 +6,15 @@ using CosmosDBProcessor.Library;
 
 namespace GithubDataProcessor
 {
-    public class ReadGithubData
+    public class WriteGithubData(ILoggerFactory loggerFactory)
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = loggerFactory.CreateLogger<WriteGithubData>();
         private readonly HttpClient _tokenClient = new();
         private CosmosDbHandler _cosmosDBhandler = new();
         private GraphQLHandler _graphQLHandler = null!;
 
-        public ReadGithubData(ILoggerFactory loggerFactory)
-        {
-            _logger = loggerFactory.CreateLogger<ReadGithubData>();
-        }
-
-        [Function("ReadGithubData")]
-        public async Task Run([TimerTrigger("0 0 22 * * 0,1,2,3,4")] TimerInfo myTimer)
+        [Function("WriteGithubData")]
+        public async Task Run([TimerTrigger("0 0 20 * * 0,1,2,3,4")] TimerInfo myTimer)
         {
             _logger.LogInformation("{Message}", $"C# Timer trigger function executed at: {DateTime.Now}");
 
@@ -37,7 +32,8 @@ namespace GithubDataProcessor
             // Load Data Source
             await _cosmosDBhandler.LoadDataSource("gh-api-data", "Repositories", "/name");
 
-            foreach (var r in repositoryData)
+            //  write 
+            foreach (var r in repositoryData!)
             {
                 Console.WriteLine(r);
             }
