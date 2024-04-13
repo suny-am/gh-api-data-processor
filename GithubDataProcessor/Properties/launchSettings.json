@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "gh_data_collector": {
+    "GithubDataProcessor": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7029",
+      "commandLineArgs": "--port 7192",
       "launchBrowser": false
     }
   }

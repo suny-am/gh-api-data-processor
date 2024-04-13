@@ -1,8 +1,6 @@
 {
 	"name": "Github API Data Processor",
-	"dockerComposeFile": "docker-compose.yaml",
-	"service": "app",
-	"workspaceFolder": "/workspace",
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm",
 	"containerEnv": {
 		"HOME": "/home/vscode"
 	},
