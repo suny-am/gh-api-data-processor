@@ -24,7 +24,7 @@
     <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\cosmos-db-processor\cosmos-db-processor.Library\cosmos-db-processor.Library.csproj" />
     <ProjectReference Include="..\github-api-dotnet\GithubAPI.Library\GithubAPI.Library.csproj" />
+    <ProjectReference Include="..\cosmos-db-processor\CosmosDBProcessor.Library\CosmosDBProcessor.Library.csproj" />
   </ItemGroup>
 </Project>

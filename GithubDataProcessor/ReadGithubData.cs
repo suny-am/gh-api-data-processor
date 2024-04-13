@@ -1,7 +1,8 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using CosmosDBProcessor.Library;
+using GithubAPI.Library.GraphQL.Records;
 using GithubAPI.Library.GraphQL;
+using CosmosDBProcessor.Library;
 
 namespace GithubDataProcessor
 {
@@ -9,7 +10,7 @@ namespace GithubDataProcessor
     {
         private readonly ILogger _logger;
         private readonly HttpClient _tokenClient = new();
-        private readonly CosmosDbHandler _cosmosDBhandler = new();
+        private CosmosDbHandler _cosmosDBhandler = new();
         private GraphQLHandler _graphQLHandler = null!;
 
         public ReadGithubData(ILoggerFactory loggerFactory)
@@ -26,7 +27,7 @@ namespace GithubDataProcessor
 
             _graphQLHandler = new(token);
 
-            IEnumerable<Repository> repositoryData = await _graphQLHandler.GetRepositoriesBySearch();
+            IEnumerable<Repository>? repositoryData = await _graphQLHandler.GetRepositoriesBySearch();
 
             if (repositoryData is null)
             {
@@ -38,7 +39,7 @@ namespace GithubDataProcessor
 
             foreach (var r in repositoryData)
             {
-                System.Console.WriteLine(r.);
+                Console.WriteLine(r);
             }
 
             if (myTimer.ScheduleStatus is not null)
