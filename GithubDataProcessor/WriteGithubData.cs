@@ -16,31 +16,50 @@ namespace GithubDataProcessor
         [Function("WriteGithubData")]
         public async Task Run([TimerTrigger("0 0 20 * * 0,1,2,3,4")] TimerInfo myTimer)
         {
-            _logger.LogInformation("{Message}", $"C# Timer trigger function executed at: {DateTime.Now}");
+            _logger.LogInformation("{Message}",
+                                    $"Write operations from" +
+                                    $"Github to CosmosDB started at: {DateTime.Now}");
 
-            string token = await _tokenClient.GetStringAsync(Environment.GetEnvironmentVariable("GITHUB_TOKEN_ENDPOINT"));
-
-            _graphQLHandler = new(token);
-
-            IEnumerable<Repository>? repositoryData = await _graphQLHandler.GetRepositoriesBySearch();
-
-            if (repositoryData is null)
+            bool operationCompleted = false;
+            try
             {
-                _logger.LogError("could not load data: {repositoryData}", repositoryData);
+                string ghApiToken = await _tokenClient.GetStringAsync(Environment
+                                                        .GetEnvironmentVariable("GITHUB_TOKEN_ENDPOINT"));
+
+                _graphQLHandler = new(ghApiToken);
+
+                IEnumerable<Repository>? repositoryData = await _graphQLHandler
+                                                                    .GetRepositoriesBySearch();
+
+                await _cosmosDBhandler.LoadDataSource("gh-api-data", "Repositories", "/name");
+
+                IEnumerable<RepositoryItem> repositoryItems = repositoryData!.Select(r => new RepositoryItem(
+                                                                                                r.id,
+                                                                                                r.name,
+                                                                                                r.homepageUrl,
+                                                                                                r.url,
+                                                                                                r.pushedAt,
+                                                                                                r.diskUsage,
+                                                                                                r.commitTotal,
+                                                                                                r.description
+                                                                                                ));
+
+                await _cosmosDBhandler.UnitOfWork(repositoryItems, "CREATE");
+                operationCompleted = true;
             }
-
-            // Load Data Source
-            await _cosmosDBhandler.LoadDataSource("gh-api-data", "Repositories", "/name");
-
-            //  write 
-            foreach (var r in repositoryData!)
+            catch (Exception ex)
             {
-                Console.WriteLine(r);
+                _logger.LogError("{Message}", $"Could not complete write operations: {ex.Message}");
             }
-
-            if (myTimer.ScheduleStatus is not null)
+            finally
             {
-                _logger.LogInformation("{Message}", $"Next timer schedule at: {myTimer.ScheduleStatus.Next}");
+                string operationStatus = operationCompleted ? "completed" : "failed";
+
+                if (myTimer.ScheduleStatus is not null)
+                {
+                    _logger.LogInformation("{Message}", $" Operation {operationStatus}. " +
+                    $"Next timer scheduled to: {myTimer.ScheduleStatus.Next}");
+                }
             }
         }
     }
