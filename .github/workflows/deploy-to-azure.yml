@@ -30,6 +30,10 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Initialize Submodules
+        run: |
+            git submodule update --init --recursive
+
       - name: "Resolve Project Dependencies Using Dotnet"
         shell: pwsh
         run: |
