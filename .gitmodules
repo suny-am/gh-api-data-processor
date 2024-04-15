@@ -1,0 +1,6 @@
+[submodule "github-api-dotnet"]
+	path = github-api-dotnet
+	url = https://github.com/suny-am/github-api-dotnet
+[submodule "cosmos-db-processor"]
+	path = cosmos-db-processor
+	url = https://github.com/suny-am/cosmos-db-processor
