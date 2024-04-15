@@ -42,6 +42,6 @@ jobs:
         id: fa
         with:
           slot-name: "stage"
-          app-name: "gh-api-token-provider"
+          app-name: "gh-api-data-processor"
           package: "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output"
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
