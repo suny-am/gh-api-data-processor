@@ -1,8 +1,9 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using GithubAPI.Library.GraphQL.Records;
 using GithubAPI.Library.GraphQL;
+using GithubAPI.Library.GraphQL.Requests;
 using CosmosDBProcessor.Library;
+using GithubAPI.Library.GraphQL.Types;
 
 namespace GithubDataProcessor
 {
@@ -28,21 +29,36 @@ namespace GithubDataProcessor
 
                 _graphQLHandler = new(ghApiToken);
 
-                IEnumerable<Repository>? repositoryData = await _graphQLHandler
-                                                                    .GetRepositoriesBySearch();
+                var repoQuery = new RepositoryQuery();
+
+                var query = repoQuery.Query;
+                var variables = repoQuery.Variables;
+
+                AuthenticatedRequest request = new(query, variables);
+
+                ResponseType? response = await _graphQLHandler
+                                                .PerformQuery(request) 
+                                                ?? throw new Exception("Query failed");
+
+                IEnumerable<RepositoryType?>? repositories = response?
+                                                            .Search?
+                                                            .Edges?
+                                                            .Select(e => e.Node)
+                                                            ?? throw new Exception("Could not load repositories");
 
                 await _cosmosDBhandler.LoadDataSource("gh-api-data", "Repositories", "/name");
 
-                IEnumerable<RepositoryItem> repositoryItems = repositoryData!.Select(r => new RepositoryItem(
-                                                                                                r.id,
-                                                                                                r.name,
-                                                                                                r.homepageUrl,
-                                                                                                r.url,
-                                                                                                r.pushedAt,
-                                                                                                r.diskUsage,
-                                                                                                r.commitTotal,
-                                                                                                r.description
-                                                                                                ));
+                IEnumerable<RepositoryItem> repositoryItems = repositories!
+                                                            .Select(r => new RepositoryItem(
+                                                                                            id: r!.ID!,
+                                                                                            name: r.Name!,
+                                                                                            homepageUrl: r.HomepageURL!,
+                                                                                            url: r.URL,
+                                                                                            pushedAt: r.PushedAt,
+                                                                                            r.DiskUsage,
+                                                                                            commitTotal: r.DefaultBranchRef!.Target!.History!.TotalCount,
+                                                                                            description: r.Description!
+                                                                                            ));
 
                 await _cosmosDBhandler.UnitOfWork(repositoryItems, "CREATE");
                 operationCompleted = true;
