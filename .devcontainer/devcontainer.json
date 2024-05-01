@@ -4,6 +4,13 @@
 	"containerEnv": {
 		"HOME": "/home/vscode"
 	},
+	"runArgs": [
+		"--env-file",
+		".env"
+	],
+	"remoteEnv": {
+		"FUNCTIONS_CORE_TOOLS_TELEMETRY_OPTOUT": "1"
+	},
 	"features": {
 		"ghcr.io/devcontainers/features/azure-cli": {
 			"version": "latest"
@@ -14,6 +21,9 @@
 	},
 	"customizations": {
 		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh"
+			},
 			"extensions": [
 				"ms-dotnettools.csdevkit",
 				"ms-azuretools.vscode-azurefunctions"
