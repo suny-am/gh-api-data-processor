@@ -21,11 +21,11 @@ namespace GithubDataProcessor
                                     $"Write operations from" +
                                     $"Github to CosmosDB started at: {DateTime.Now}");
 
-            bool operationCompleted = false;
             try
             {
                 string ghApiToken = await _tokenClient.GetStringAsync(Environment
-                                                        .GetEnvironmentVariable("GITHUB_TOKEN_ENDPOINT"));
+                                                        .GetEnvironmentVariable("GITHUB_TOKEN_ENDPOINT"))
+                                                        ?? throw new HttpRequestException("Could not get Github Access Token");
 
                 _graphQLHandler = new(ghApiToken);
 
@@ -37,8 +37,7 @@ namespace GithubDataProcessor
                 AuthenticatedRequest request = new(query, variables);
 
                 ResponseType? response = await _graphQLHandler
-                                                .PerformQuery(request) 
-                                                ?? throw new Exception("Query failed");
+                                                .PerformQuery(request);
 
                 IEnumerable<RepositoryType?>? repositories = response?
                                                             .Search?
@@ -61,22 +60,18 @@ namespace GithubDataProcessor
                                                                                             ));
 
                 await _cosmosDBhandler.UnitOfWork(repositoryItems, "CREATE");
-                operationCompleted = true;
             }
             catch (Exception ex)
             {
-                _logger.LogError("{Message}", $"Could not complete write operations: {ex.Message}");
+                _logger.LogError("{Message}", $"Could not complete write operations: {ex}");
             }
-            finally
-            {
-                string operationStatus = operationCompleted ? "completed" : "failed";
 
-                if (myTimer.ScheduleStatus is not null)
-                {
-                    _logger.LogInformation("{Message}", $" Operation {operationStatus}. " +
-                    $"Next timer scheduled to: {myTimer.ScheduleStatus.Next}");
-                }
+            if (myTimer.ScheduleStatus is not null)
+            {
+                _logger.LogInformation("{Message}", $" Operation completed. " +
+                $"Next timer scheduled to: {myTimer.ScheduleStatus.Next}");
             }
+
         }
     }
 }
